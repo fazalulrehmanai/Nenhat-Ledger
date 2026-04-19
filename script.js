@@ -280,11 +280,4 @@ window.editEntry = (id) => {
     document.getElementById('entry-modal').classList.add('active');
 };
 
-// PWA: Service Worker
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('SW Registered', reg))
-            .catch(err => console.log('SW Registration Failed', err));
-    });
-}
+
