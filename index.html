@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nenhat Digital Ledger</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1A4D2E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Auth Screen -->
+    <div id="auth-screen" class="screen active">
+        <div class="auth-card">
+            <div class="logo">
+                <span class="logo-emerald">Nenhat</span> <span class="logo-gold">Ledger</span>
+            </div>
+            <div class="auth-tabs">
+                <button id="tab-login" class="tab-btn active" onclick="showAuthMode('login')">Login</button>
+                <button id="tab-signup" class="tab-btn" onclick="showAuthMode('signup')">Signup</button>
+            </div>
+            
+            <form id="auth-form" onsubmit="handleAuth(event)">
+                <div id="signup-fields" class="hidden">
+                    <div class="input-group">
+                        <label for="full-name">Full Name</label>
+                        <input type="text" id="full-name" placeholder="Enter your full name">
+                    </div>
+                    <div class="input-group">
+                        <label for="mobile">Mobile Number</label>
+                        <input type="tel" id="mobile" placeholder="e.g. 0300 1234567">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required placeholder="Enter your email">
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="Enter your password">
+                </div>
+                <button type="submit" id="auth-submit" class="btn btn-primary">Login</button>
+            </form>
+            <div id="auth-error" class="error-msg"></div>
+        </div>
+    </div>
+
+    <!-- Verification Screen -->
+    <div id="verify-screen" class="screen">
+        <div class="auth-card text-center">
+            <h2 class="emerald-text">Verify Your Email</h2>
+            <p>Access to the ledger is strictly granted only after email verification.</p>
+            <p class="small">We've sent a link to your email. Once verified, refresh this page.</p>
+            <button onclick="resendVerification()" class="btn btn-primary mt-4">Resend Verification Email</button>
+            <button onclick="signOutUser()" class="btn btn-secondary mt-2">Back to Login</button>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboard-screen" class="screen">
+        <div class="dashboard-layout">
+            <aside class="sidebar">
+                <div class="logo-mini">
+                    <span>✨</span> Nenhat Ledger
+                </div>
+                <nav class="sidebar-nav">
+                    <button class="nav-item active"><span>📖</span> Dashboard</button>
+                    <button class="nav-item"><span>👥</span> Givers List</button>
+                    <button class="nav-item"><span>📈</span> Analytics</button>
+                    <button class="nav-item"><span>⚙️</span> Settings</button>
+                    <button class="nav-item" onclick="signOutUser()"><span>🚪</span> Logout</button>
+                </nav>
+                <div class="sidebar-footer">
+                    <div class="plan-card">
+                        <p class="plan-label">Plan: <span id="current-plan">Free</span></p>
+                        <p class="entry-limit"><span id="entry-count">0</span> of 20 entries used.</p>
+                        <button class="btn btn-gold btn-sm" disabled>Upgrade to Pro</button>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="main-content">
+                <header class="top-header">
+                    <div>
+                        <h1 class="page-title">Digital Ledger Overview</h1>
+                        <p style="color: var(--text-muted); font-size: 0.85rem;" id="welcome-msg">Welcome back</p>
+                    </div>
+                    <div class="user-profile">
+                        <div style="text-align: right">
+                            <p style="font-size: 0.85rem; font-weight: 600;" id="user-display-name">User Name</p>
+                            <p style="font-size: 0.75rem; color: var(--text-muted);">Verified Member</p>
+                        </div>
+                        <div class="avatar" id="user-avatar">?</div>
+                    </div>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <p class="stat-label">Total Received</p>
+                        <h2 class="stat-value emerald-text" id="total-received">PKR 0</h2>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-label">Total Sent</p>
+                        <h2 class="stat-value" id="total-sent">PKR 0</h2>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-label">Projected Liability</p>
+                        <h2 class="stat-value gold-text" id="total-reciprocal">PKR 0</h2>
+                    </div>
+                </div>
+
+                <div class="ledger-container">
+                    <div class="table-header">
+                        <h3 style="font-size: 1rem;">Recent Entries</h3>
+                        <button onclick="openEntryModal()" class="btn btn-primary">+ Add New Record</button>
+                    </div>
+                    <div class="table-actions">
+                        <input type="text" id="search-input" placeholder="Search by name or city..." oninput="filterEntries()">
+                        <div class="sync-status" id="sync-status" style="font-size: 0.75rem; color: var(--text-muted);">Offline</div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="ledger-table">
+                            <thead>
+                                <tr>
+                                    <th>Giver Name / Father</th>
+                                    <th>Location</th>
+                                    <th>Caste</th>
+                                    <th class="text-right">Amount (PKR)</th>
+                                    <th class="text-right">Suggested Return</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ledger-body">
+                                <!-- Entries will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Entry Modal -->
+    <div id="entry-modal" class="modal">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h2 id="modal-title">New Entry</h2>
+                <button class="close-btn" onclick="closeModal('entry-modal')">&times;</button>
+            </header>
+            <form id="entry-form" onsubmit="saveEntry(event)">
+                <input type="hidden" id="entry-id">
+                <div class="grid-form">
+                    <div class="input-group">
+                        <label>Giver's Name*</label>
+                        <input type="text" id="giver-name" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Father's Name*</label>
+                        <input type="text" id="father-name" required>
+                    </div>
+                    <div class="input-group">
+                        <label>City/Village*</label>
+                        <input type="text" id="city-village" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Caste (Optional)</label>
+                        <input type="text" id="caste">
+                    </div>
+                    <div class="input-group">
+                        <label>Amount (PKR)*</label>
+                        <input type="number" id="entry-amount" required oninput="calculateSuggested()">
+                    </div>
+                    <div class="input-group">
+                        <label>Suggested Return (2x)*</label>
+                        <input type="number" id="suggested-return" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('entry-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (CDN) -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>

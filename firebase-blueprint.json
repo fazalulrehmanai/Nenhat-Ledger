@@ -1,0 +1,44 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Information about the ledger user.",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string", "description": "User's full name" },
+        "email": { "type": "string", "format": "email", "description": "Verified email address" },
+        "mobileNumber": { "type": "string", "description": "Mobile contact number" },
+        "plan": { "type": "string", "enum": ["free", "pro"], "description": "Subscription plan status" },
+        "entryCount": { "type": "integer", "description": "Current number of entries" }
+      },
+      "required": ["fullName", "email", "mobileNumber", "plan", "entryCount"]
+    },
+    "Entry": {
+      "title": "Ledger Entry",
+      "description": "A single record of contribution (Nenhat).",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "UID of the owner" },
+        "giverName": { "type": "string", "description": "Name of the person giving the amount" },
+        "fatherName": { "type": "string", "description": "Father's name for identification" },
+        "amount": { "type": "number", "description": "Contribution amount in PKR" },
+        "cityVillage": { "type": "string", "description": "City or Village name" },
+        "caste": { "type": "string", "description": "Optional caste information" },
+        "suggestedReturn": { "type": "number", "description": "Calculated value for future return" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "giverName", "fatherName", "amount", "cityVillage", "suggestedReturn", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile document."
+    },
+    "/users/{userId}/entries/{entryId}": {
+      "schema": "Entry",
+      "description": "Individual ledger entries owned by the user."
+    }
+  }
+}
