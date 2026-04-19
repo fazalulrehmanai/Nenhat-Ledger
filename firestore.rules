@@ -1,78 +1,88 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // catch-all deny
+    // 0. Default Deny
     match /{document=**} {
       allow read, write: if false;
     }
 
     // --- Helpers ---
-    function isSignedIn() { return request.auth != null; }
-    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
-    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
-    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
-    function incoming() { return request.resource.data; }
-    function existing() { return resource.data; }
+    function isSignedIn() {
+      return request.auth != null;
+    }
 
+    function isEmailVerified() {
+      return request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- User Validation ---
     function isValidUser(data) {
-      return data.keys().hasAll(['fullName', 'email', 'mobileNumber', 'plan', 'entryCount'])
-        && data.keys().size() == 5
-        && data.fullName is string && data.fullName.size() <= 128
-        && data.email == request.auth.token.email
-        && data.mobileNumber is string && data.mobileNumber.size() <= 20
-        && data.plan in ['free', 'pro']
-        && data.entryCount is int;
+      return data.fullName is string && data.fullName.size() <= 100
+          && data.email is string && data.email.size() <= 100
+          && data.mobile is string && data.mobile.size() <= 20
+          && data.plan in ['Free', 'Pro']
+          && (data.entryCount is int && data.entryCount >= 0);
     }
 
-    function isValidEntry(data, userId) {
-      return data.keys().hasAll(['userId', 'giverName', 'fatherName', 'amount', 'cityVillage', 'suggestedReturn', 'createdAt', 'updatedAt'])
-        && data.userId == userId
-        && data.giverName is string && data.giverName.size() <= 128
-        && data.fatherName is string && data.fatherName.size() <= 128
-        && data.amount is number && data.amount >= 0
-        && data.cityVillage is string && data.cityVillage.size() <= 128
-        && (data.caste == null || (data.caste is string && data.caste.size() <= 64))
-        && data.suggestedReturn is number && data.suggestedReturn >= 0
-        && data.createdAt == request.time
-        && data.updatedAt == request.time;
+    // --- Entry Validation ---
+    function isValidEntry(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100
+          && data.fatherName is string && data.fatherName.size() > 0 && data.fatherName.size() <= 100
+          && data.amount is number && data.amount > 0
+          && data.village is string && data.village.size() > 0 && data.village.size() <= 100
+          && (data.caste == null || (data.caste is string && data.caste.size() <= 100))
+          && data.year is int && data.year >= 1900 && data.year <= 2100
+          && data.type in ['sent', 'received'];
     }
 
-    // --- User Profiles ---
+    // --- Matches ---
+
+    // User Profile
     match /users/{userId} {
       allow get: if isOwner(userId);
-      allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().plan == 'free' && incoming().entryCount == 0;
-      allow update: if isOwner(userId) && isValidUser(incoming()) 
-        && (
-          // Action: Profile Update
-          (incoming().diff(existing()).affectedKeys().hasOnly(['fullName', 'mobileNumber', 'updatedAt'])) ||
-          // Action: Internal Count Sync (Usually handled by app logic, but rules must allow)
-          (incoming().diff(existing()).affectedKeys().hasOnly(['entryCount', 'updatedAt']))
-        );
+      allow create: if isOwner(userId) 
+                    && isValidUser(request.resource.data)
+                    && request.resource.data.plan == 'Free'
+                    && request.resource.data.entryCount == 0;
+      allow update: if isOwner(userId)
+                    && isValidUser(request.resource.data)
+                    && request.resource.data.email == resource.data.email // Email immutable for ledger
+                    && (
+                      // Only allow incrementing entryCount if not changing plan here
+                      (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['entryCount', 'fullName', 'mobile']))
+                    );
     }
 
-    // --- Entries ---
+    // Ledger Entries
     match /users/{userId}/entries/{entryId} {
-      allow list: if isOwner(userId) && isVerified();
-      allow get: if isOwner(userId) && isVerified();
-      
-      allow create: if isOwner(userId) && isVerified() && isValidId(entryId) 
-        && isValidEntry(incoming(), userId)
-        && (
-          get(/databases/$(database)/documents/users/$(userId)).data.plan == 'pro' ||
-          get(/databases/$(database)/documents/users/$(userId)).data.entryCount < 20
-        );
+      allow list: if isOwner(userId);
+      allow get: if isOwner(userId);
 
-      allow update: if isOwner(userId) && isVerified() && isValidId(entryId)
-        && incoming().userId == userId
-        && incoming().createdAt == existing().createdAt
-        && incoming().updatedAt == request.time
-        && incoming().giverName is string && incoming().giverName.size() <= 128
-        && incoming().fatherName is string && incoming().fatherName.size() <= 128
-        && incoming().amount is number && incoming().amount >= 0
-        && (incoming().caste == null || (incoming().caste is string && incoming().caste.size() <= 64))
-        && incoming().suggestedReturn is number && incoming().suggestedReturn >= 0;
+      allow create: if isOwner(userId) 
+                    && isEmailVerified()
+                    && isValidEntry(request.resource.data)
+                    && isValidId(entryId)
+                    // Check limit for free plan
+                    && (get(/databases/$(database)/documents/users/$(userId)).data.plan == 'Pro' 
+                        || get(/databases/$(database)/documents/users/$(userId)).data.entryCount < 20);
 
-      allow delete: if isOwner(userId) && isVerified();
+      allow update: if isOwner(userId)
+                    && isEmailVerified()
+                    && isValidEntry(request.resource.data)
+                    && request.resource.data.diff(resource.data).affectedKeys().hasAll([]) 
+                    // Entries are fully editable per request
+                    ;
+
+      allow delete: if isOwner(userId) && isEmailVerified();
     }
   }
 }

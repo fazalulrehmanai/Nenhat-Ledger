@@ -2,43 +2,43 @@
   "entities": {
     "User": {
       "title": "User Profile",
-      "description": "Information about the ledger user.",
+      "description": "Stores user core profile information.",
       "type": "object",
       "properties": {
-        "fullName": { "type": "string", "description": "User's full name" },
-        "email": { "type": "string", "format": "email", "description": "Verified email address" },
-        "mobileNumber": { "type": "string", "description": "Mobile contact number" },
-        "plan": { "type": "string", "enum": ["free", "pro"], "description": "Subscription plan status" },
-        "entryCount": { "type": "integer", "description": "Current number of entries" }
+        "fullName": { "type": "string", "description": "Full name of the user" },
+        "email": { "type": "string", "format": "email" },
+        "mobile": { "type": "string", "description": "Mobile number" },
+        "plan": { "type": "string", "enum": ["Free", "Pro"], "description": "Subscription plan" },
+        "entryCount": { "type": "integer", "description": "Current number of entries for free plan limit" }
       },
-      "required": ["fullName", "email", "mobileNumber", "plan", "entryCount"]
+      "required": ["fullName", "email", "plan"]
     },
     "Entry": {
       "title": "Ledger Entry",
-      "description": "A single record of contribution (Nenhat).",
+      "description": "A single ledger record for Nenhat.",
       "type": "object",
       "properties": {
-        "userId": { "type": "string", "description": "UID of the owner" },
-        "giverName": { "type": "string", "description": "Name of the person giving the amount" },
-        "fatherName": { "type": "string", "description": "Father's name for identification" },
-        "amount": { "type": "number", "description": "Contribution amount in PKR" },
-        "cityVillage": { "type": "string", "description": "City or Village name" },
-        "caste": { "type": "string", "description": "Optional caste information" },
-        "suggestedReturn": { "type": "number", "description": "Calculated value for future return" },
+        "name": { "type": "string", "description": "Giver's Name" },
+        "fatherName": { "type": "string", "description": "Father's Name" },
+        "amount": { "type": "number", "description": "Amount in PKR" },
+        "village": { "type": "string", "description": "City or Village" },
+        "caste": { "type": "string", "description": "Caste (Optional)" },
+        "year": { "type": "integer", "description": "Year of transaction" },
+        "type": { "type": "string", "enum": ["sent", "received"], "description": "Transaction type" },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["userId", "giverName", "fatherName", "amount", "cityVillage", "suggestedReturn", "createdAt", "updatedAt"]
+      "required": ["name", "fatherName", "amount", "village", "year", "type"]
     }
   },
   "firestore": {
     "/users/{userId}": {
       "schema": "User",
-      "description": "User profile document."
+      "description": "User profile document"
     },
     "/users/{userId}/entries/{entryId}": {
       "schema": "Entry",
-      "description": "Individual ledger entries owned by the user."
+      "description": "Individual ledger entry for a specific user"
     }
   }
 }

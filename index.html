@@ -4,187 +4,265 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nenhat Digital Ledger</title>
-    <link rel="stylesheet" href="style.css">
-    <meta name="theme-color" content="#1A4D2E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-    <!-- Auth Screen -->
-    <div id="auth-screen" class="screen active">
-        <div class="auth-card">
-            <div class="logo">
-                <span class="logo-emerald">Nenhat</span> <span class="logo-gold">Ledger</span>
-            </div>
-            <div class="auth-tabs">
-                <button id="tab-login" class="tab-btn active" onclick="showAuthMode('login')">Login</button>
-                <button id="tab-signup" class="tab-btn" onclick="showAuthMode('signup')">Signup</button>
-            </div>
-            
-            <form id="auth-form" onsubmit="handleAuth(event)">
-                <div id="signup-fields" class="hidden">
-                    <div class="input-group">
-                        <label for="full-name">Full Name</label>
-                        <input type="text" id="full-name" placeholder="Enter your full name">
+    <div id="app">
+        <!-- Auth Screen -->
+        <div id="auth-screen" class="screen active">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <img src="https://picsum.photos/seed/nenhat/100/100" alt="Logo" class="auth-logo" referrerPolicy="no-referrer">
+                        <h1>Nenhat Digital</h1>
+                        <p id="auth-subtitle">Professional Ledger Solutions</p>
                     </div>
-                    <div class="input-group">
-                        <label for="mobile">Mobile Number</label>
-                        <input type="tel" id="mobile" placeholder="e.g. 0300 1234567">
+                    
+                    <div class="auth-tabs">
+                        <button id="tab-login" class="auth-tab active" onclick="toggleAuthMode('login')">Login</button>
+                        <button id="tab-signup" class="auth-tab" onclick="toggleAuthMode('signup')">Sign Up</button>
                     </div>
-                </div>
-                <div class="input-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" required placeholder="Enter your email">
-                </div>
-                <div class="input-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" required placeholder="Enter your password">
-                </div>
-                <button type="submit" id="auth-submit" class="btn btn-primary">Login</button>
-            </form>
-            <div id="auth-error" class="error-msg"></div>
-        </div>
-    </div>
 
-    <!-- Verification Screen -->
-    <div id="verify-screen" class="screen">
-        <div class="auth-card text-center">
-            <h2 class="emerald-text">Verify Your Email</h2>
-            <p>Access to the ledger is strictly granted only after email verification.</p>
-            <p class="small">We've sent a link to your email. Once verified, refresh this page.</p>
-            <button onclick="resendVerification()" class="btn btn-primary mt-4">Resend Verification Email</button>
-            <button onclick="signOutUser()" class="btn btn-secondary mt-2">Back to Login</button>
+                    <form id="auth-form">
+                        <div class="form-group signup-only">
+                            <label for="reg-name">Full Name</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="user"></i>
+                                <input type="text" id="reg-name" placeholder="Enter full name">
+                            </div>
+                        </div>
+                        <div class="form-group signup-only">
+                            <label for="reg-mobile">Mobile Number</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="phone"></i>
+                                <input type="text" id="reg-mobile" placeholder="+92 300 1234567">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="auth-email">Email Address</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="mail"></i>
+                                <input type="email" id="auth-email" required placeholder="name@example.com">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="auth-password">Password</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="lock"></i>
+                                <input type="password" id="auth-password" required placeholder="••••••••">
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('auth-password')">
+                                    <i data-lucide="eye" id="eye-icon"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="submit" id="auth-submit-btn" class="btn btn-primary">Login</button>
+                    </form>
+                    <div id="auth-error" class="error-msg"></div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <!-- Dashboard Screen -->
-    <div id="dashboard-screen" class="screen">
-        <div class="dashboard-layout">
-            <aside class="sidebar">
-                <div class="logo-mini">
-                    <span>✨</span> Nenhat Ledger
+        <!-- Verification Screen -->
+        <div id="verify-screen" class="screen">
+            <div class="auth-container">
+                <div class="auth-card text-center">
+                    <i data-lucide="mail-check" class="verify-icon"></i>
+                    <h2>Verify Your Email</h2>
+                    <p>We've sent a verification link to your email. Please click it to activate your account and access the ledger.</p>
+                    <button class="btn btn-primary" onclick="checkVerificationStatus()">I've Verified</button>
+                    <button class="btn btn-link" onclick="signOutUser()">Back to Login</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div id="main-dashboard" class="screen">
+            <header class="top-nav">
+                <button class="burger-menu" onclick="toggleSidebar()">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="logo">
+                    <span class="logo-text">Nenhat Ledger</span>
+                </div>
+                <div class="user-pill">
+                    <span id="user-name-display">...</span>
+                </div>
+            </header>
+
+            <aside id="sidebar" class="sidebar">
+                <div class="sidebar-header">
+                    <div class="pro-badge">Free Plan</div>
+                    <button class="close-sidebar" onclick="toggleSidebar()">
+                        <i data-lucide="x"></i>
+                    </button>
                 </div>
                 <nav class="sidebar-nav">
-                    <button class="nav-item active"><span>📖</span> Dashboard</button>
-                    <button class="nav-item"><span>👥</span> Givers List</button>
-                    <button class="nav-item"><span>📈</span> Analytics</button>
-                    <button class="nav-item"><span>⚙️</span> Settings</button>
-                    <button class="nav-item" onclick="signOutUser()"><span>🚪</span> Logout</button>
+                    <a href="#" class="nav-item active" onclick="showScreen('dashboard-content')">
+                        <i data-lucide="home"></i> Home
+                    </a>
+                    <a href="#" class="nav-item" onclick="filterByType('sent')">
+                        <i data-lucide="arrow-up-right"></i> Sent Nenhat
+                    </a>
+                    <a href="#" class="nav-item" onclick="filterByType('received')">
+                        <i data-lucide="arrow-down-left"></i> Received Nenhat
+                    </a>
+                    <a href="#" class="nav-item" onclick="showScreen('profile-content')">
+                        <i data-lucide="user"></i> Profile
+                    </a>
                 </nav>
                 <div class="sidebar-footer">
-                    <div class="plan-card">
-                        <p class="plan-label">Plan: <span id="current-plan">Free</span></p>
-                        <p class="entry-limit"><span id="entry-count">0</span> of 20 entries used.</p>
-                        <button class="btn btn-gold btn-sm" disabled>Upgrade to Pro</button>
-                    </div>
+                    <a href="https://wa.me/3471138739" target="_blank" class="btn btn-gold w-full mb-2">Upgrade to Pro</a>
+                    <button onclick="signOutUser()" class="btn btn-outline w-full">
+                        <i data-lucide="log-out"></i> Sign Out
+                    </button>
                 </div>
             </aside>
 
-            <main class="main-content">
-                <header class="top-header">
-                    <div>
-                        <h1 class="page-title">Digital Ledger Overview</h1>
-                        <p style="color: var(--text-muted); font-size: 0.85rem;" id="welcome-msg">Welcome back</p>
-                    </div>
-                    <div class="user-profile">
-                        <div style="text-align: right">
-                            <p style="font-size: 0.85rem; font-weight: 600;" id="user-display-name">User Name</p>
-                            <p style="font-size: 0.75rem; color: var(--text-muted);">Verified Member</p>
+            <main class="content-area">
+                <!-- Dashboard Home -->
+                <div id="dashboard-content" class="content-pane active">
+                    <div class="summary-row">
+                        <div class="summary-card gold-border">
+                            <div class="summary-info">
+                                <span class="label">Total Sent</span>
+                                <span id="total-sent" class="amount">0 PKR</span>
+                            </div>
+                            <i data-lucide="arrow-up-right" class="icon sent"></i>
                         </div>
-                        <div class="avatar" id="user-avatar">?</div>
+                        <div class="summary-card emerald-border">
+                            <div class="summary-info">
+                                <span class="label">Total Received</span>
+                                <span id="total-received" class="amount">0 PKR</span>
+                            </div>
+                            <i data-lucide="arrow-down-left" class="icon received"></i>
+                        </div>
                     </div>
-                </header>
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <p class="stat-label">Total Received</p>
-                        <h2 class="stat-value emerald-text" id="total-received">PKR 0</h2>
+                    <div class="actions-row">
+                        <h2>Entries</h2>
+                        <button class="btn btn-primary" onclick="openEntryModal()">
+                            <i data-lucide="plus"></i> Add Entry
+                        </button>
                     </div>
-                    <div class="stat-card">
-                        <p class="stat-label">Total Sent</p>
-                        <h2 class="stat-value" id="total-sent">PKR 0</h2>
-                    </div>
-                    <div class="stat-card">
-                        <p class="stat-label">Projected Liability</p>
-                        <h2 class="stat-value gold-text" id="total-reciprocal">PKR 0</h2>
-                    </div>
-                </div>
 
-                <div class="ledger-container">
-                    <div class="table-header">
-                        <h3 style="font-size: 1rem;">Recent Entries</h3>
-                        <button onclick="openEntryModal()" class="btn btn-primary">+ Add New Record</button>
+                    <div class="filters-row">
+                        <div class="filter-group">
+                            <select id="filter-village" onchange="applyFilters()">
+                                <option value="">All Villages</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <select id="filter-caste" onchange="applyFilters()">
+                                <option value="">All Castes</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-link" onclick="resetFilters()">Reset</button>
                     </div>
-                    <div class="table-actions">
-                        <input type="text" id="search-input" placeholder="Search by name or city..." oninput="filterEntries()">
-                        <div class="sync-status" id="sync-status" style="font-size: 0.75rem; color: var(--text-muted);">Offline</div>
-                    </div>
-                    <div class="table-wrapper">
-                        <table id="ledger-table">
+
+                    <div class="table-container">
+                        <table>
                             <thead>
                                 <tr>
-                                    <th>Giver Name / Father</th>
-                                    <th>Location</th>
+                                    <th>Name</th>
+                                    <th>Village</th>
                                     <th>Caste</th>
-                                    <th class="text-right">Amount (PKR)</th>
-                                    <th class="text-right">Suggested Return</th>
+                                    <th>Year</th>
+                                    <th class="text-right">Amount</th>
+                                    <th>Type</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="ledger-body">
-                                <!-- Entries will be injected here -->
+                            <tbody id="entries-body">
+                                <!-- Entries loaded via JS -->
                             </tbody>
                         </table>
                     </div>
                 </div>
+
+                <!-- Profile Pane -->
+                <div id="profile-content" class="content-pane">
+                    <div class="profile-card">
+                        <h2>User Profile</h2>
+                        <div class="profile-info">
+                            <p><strong>Name:</strong> <span id="p-name">...</span></p>
+                            <p><strong>Email:</strong> <span id="p-email">...</span></p>
+                            <p><strong>Mobile:</strong> <span id="p-mobile">...</span></p>
+                            <p><strong>Plan:</strong> <span class="badge badge-gold">Free</span></p>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
-    </div>
 
-    <!-- Entry Modal -->
-    <div id="entry-modal" class="modal">
-        <div class="modal-content">
-            <header class="modal-header">
-                <h2 id="modal-title">New Entry</h2>
-                <button class="close-btn" onclick="closeModal('entry-modal')">&times;</button>
-            </header>
-            <form id="entry-form" onsubmit="saveEntry(event)">
-                <input type="hidden" id="entry-id">
-                <div class="grid-form">
-                    <div class="input-group">
-                        <label>Giver's Name*</label>
-                        <input type="text" id="giver-name" required>
-                    </div>
-                    <div class="input-group">
-                        <label>Father's Name*</label>
-                        <input type="text" id="father-name" required>
-                    </div>
-                    <div class="input-group">
-                        <label>City/Village*</label>
-                        <input type="text" id="city-village" required>
-                    </div>
-                    <div class="input-group">
-                        <label>Caste (Optional)</label>
-                        <input type="text" id="caste">
-                    </div>
-                    <div class="input-group">
-                        <label>Amount (PKR)*</label>
-                        <input type="number" id="entry-amount" required oninput="calculateSuggested()">
-                    </div>
-                    <div class="input-group">
-                        <label>Suggested Return (2x)*</label>
-                        <input type="number" id="suggested-return" required>
-                    </div>
+        <!-- Modals -->
+        <div id="entry-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modal-title">New Entry</h2>
+                    <button onclick="closeModal()" class="close-btn">&times;</button>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('entry-modal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Entry</button>
-                </div>
-            </form>
+                <form id="entry-form">
+                    <input type="hidden" id="entry-id">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Transaction Type</label>
+                            <div class="toggle-group">
+                                <input type="radio" name="entry-type" value="sent" id="type-sent" checked>
+                                <label for="type-sent">Sent (Gave)</label>
+                                <input type="radio" name="entry-type" value="received" id="type-received">
+                                <label for="type-received">Received (Got)</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="e-name">Giver's Name</label>
+                            <input type="text" id="e-name" required placeholder="Person's name">
+                        </div>
+                        <div class="form-group">
+                            <label for="e-father">Father's Name</label>
+                            <input type="text" id="e-father" required placeholder="Father's name">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="e-amount">Amount (PKR)</label>
+                            <input type="number" id="e-amount" required placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="e-year">Year</label>
+                            <input type="number" id="e-year" required value="2024">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="e-village">City/Village</label>
+                            <input type="text" id="e-village" required placeholder="Village name">
+                        </div>
+                        <div class="form-group">
+                            <label for="e-caste">Caste (Optional)</label>
+                            <input type="text" id="e-caste" placeholder="Caste name">
+                        </div>
+                    </div>
+                    
+                    <div class="suggested-return" id="suggested-box">
+                        Suggested Return: <span id="suggested-amount">0</span> PKR (2x)
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary w-full">Save Entry</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Firebase SDK (CDN) -->
-<script type="module" src="script.js"></script></body>
+    <!-- Firebase SDK (v11 CDN) -->
+    <script type="module" src="script.js"></script>
+</body>
 </html>
