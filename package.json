@@ -1,5 +1,5 @@
 {
-  "name": "react-example",
+  "name": "nenhat-digital-ledger",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,9 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vite": "^6.2.0"
+
   },
   "devDependencies": {
+    "@types/node": "^22.14.0",
+    
+    "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }
 }
