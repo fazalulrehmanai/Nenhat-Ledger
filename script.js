@@ -1,18 +1,17 @@
 // Firebase SDK
- const app = initializeApp(firebaseConfig);
-</script>
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Firebase Configuration from your config file
 const firebaseConfig = {
-    apiKey: "AIzaSyCcLrhpoC6LzJ-Lef_kHoP_8oSX8sE_Njk",
-    authDomain: "gen-lang-client-0207558444.firebaseapp.com",
-    projectId: "gen-lang-client-0207558444",
-    storageBucket: "gen-lang-client-0207558444.firebasestorage.app",
-    messagingSenderId: "1062539454662",
-    appId: "1:1062539454662:web:2aa221cf0a50a461e28fc7"
+  apiKey: "AIzaSyCcLrhpoC6LzJ-Lef_kHoP_8oSX8sE_Njk",
+  authDomain: "gen-lang-client-0207558444.firebaseapp.com",
+  databaseURL: "https://gen-lang-client-0207558444-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "gen-lang-client-0207558444",
+  storageBucket: "gen-lang-client-0207558444.firebasestorage.app",
+  messagingSenderId: "1062539454662",
+  appId: "1:1062539454662:web:2aa221cf0a50a461e28fc7"
 };
 
 const app = initializeApp(firebaseConfig);
